@@ -1,0 +1,77 @@
+<html>
+    <head>
+
+    </head>
+    <body>
+        <h1>Web Data</h1>
+
+        <h4>Add URL</h4>
+        <input class="channel-input" type="text" placeholder="paste YouTube url" />
+        <button type="submit" onclick="submitLink()">submit</button>
+        
+        <div class="container"></div>
+
+        <script>
+
+            function submitLink() {
+                const channelURL = document.querySelector('.channel-input').value;
+                fetch('http://localhost:3000/creators', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({channelURL})
+                })    
+            }
+
+            function scrapeElement(type, attrs={}) {
+                const el = document.createElement(type);
+                for (let attr in attrs) {
+                    const value = attrs[attr];
+                    if (attr == 'innerText') {
+                        el.innerText = value;   
+                    }
+                    else el.setAttribute(attr, value);
+                }
+                return el;
+            }
+
+            async function loadCreators() {
+                const res = await fetch('http://localhost:3000/creators');
+                const products = await res.json();
+                const ctr = document.querySelector('.container');
+
+                products.forEach(product => {
+                    const card = scrapeElement('div', {class: 'card'});
+                    const title = scrapeElement('h4', {innerText: product.name});
+                    const price = scrapeElement('h4', {innerText: product.price});
+                    const id = scrapeElement('h4', {innerText: product.id});
+                    const description = scrapeElement('h4', {innerText: product.description});
+                    const img = scrapeElement('img', {src: product.img});
+                    img.style.width = '100px';
+                    card.appendChild(title);
+                    card.appendChild(id);
+                    card.appendChild(price);
+                    card.appendChild(description);
+                    card.appendChild(img);
+                    ctr.appendChild(card);
+                })
+            }
+
+            loadCreators();
+
+        </script>
+        <style>
+            .container {
+                display: flex;
+                flex: 1
+            }
+            .card {
+                margin: 5px;
+                padding: 20px;
+                border: 1px solid white;
+            }
+        </style>
+
+    </body>
+</html>
