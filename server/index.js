@@ -1,6 +1,6 @@
-const express = require('express')
-const app = express()
-const port = 3000
+const express = require('express');
+const app = express();
+const port = 3000;
 
 const bodyParser = require('body-parser');
 
@@ -15,20 +15,16 @@ app.use((req, res, next) => {
 });
 
 app.get('/creators', async (req, res) => {
-    const products = [
-        {id: '1', name: 'Product 1', price: 38.0, description: 'abc'},
-        {id: '2', name: 'Product 2', price: 8.0, description: 'abc'},
-        {id: '3', name: 'Product 3', price: 3.0, description: 'abc'}
-    ];
+    const products = req.body;
+    console.log(req.body, 'get');
     res.send(products);
 })
 
 app.post('/creators', async (req, res) => {
-    console.log(req.body);
     const scrapeData = await scraper.scrapeWebsite(req.body.channelURL);
-    console.log(scrapeData);
+    console.log(scrapeData, 'post');
     
-    res.send('success');
+    res.send(scrapeData);
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

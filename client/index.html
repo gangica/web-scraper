@@ -41,21 +41,7 @@
                 const products = await res.json();
                 const ctr = document.querySelector('.container');
 
-                products.forEach(product => {
-                    const card = scrapeElement('div', {class: 'card'});
-                    const title = scrapeElement('h4', {innerText: product.name});
-                    const price = scrapeElement('h4', {innerText: product.price});
-                    const id = scrapeElement('h4', {innerText: product.id});
-                    const description = scrapeElement('h4', {innerText: product.description});
-                    const img = scrapeElement('img', {src: product.img});
-                    img.style.width = '100px';
-                    card.appendChild(title);
-                    card.appendChild(id);
-                    card.appendChild(price);
-                    card.appendChild(description);
-                    card.appendChild(img);
-                    ctr.appendChild(card);
-                })
+                console.log(products);
             }
 
             loadCreators();

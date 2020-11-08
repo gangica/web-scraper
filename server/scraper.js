@@ -1,40 +1,44 @@
 const puppeteer = require('puppeteer');
 
 async function scrapeWebsite(url) {
-    const objs = [];
+    let result = [];
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(url);
 
-    // const elmtProducts = await page.$x('//div[contains(@class, "item_prosp")]');
-    // const products = await page.evaluate((...elmtProducts) => {
-    //     return elmtProducts.map((e, i) => {
-    //         objs[i] = {}
-    //     });
-    // }, ...elmtProducts)
-    // console.log(products);
-
-    const elmtNames = await page.$x('//*[@class="woocommerce-loop-product__title"]');  
-    const names = await page.evaluate((...elmtNames) => {
-        return elmtNames.map(e => e.innerText);
-    }, ...elmtNames);
-
-    const elmtPrices = await page.$x('//*[@class="woocommerce-Price-amount amount"]');
-    const prices = await page.evaluate((...elmtPrices) => {
-        return elmtPrices.map(e => e.innerText);
-    }, ...elmtPrices);
+    const links = await page.$$eval('[class*="item_prosp"]', urls => {
+        urls = urls.map(item => {
+            return item.querySelector('div > a').href;
+        })
+        return urls;
+    });
     
-    const elmtImg = await page.$x('//*[@class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail"]');
-    const imgs = await page.evaluate((...elmtImg) => {
-        return elmtImg.map(e => e.src);
-    }, ...elmtImg);
+    const productDetail = (link) => new Promise(async(resolve, reject) => {
+        const productPage = await browser.newPage();
+        await productPage.goto(link);
 
-    // create object
+        let name = await productPage.$eval('.product_title', name => name.innerText);
+        let rating = await productPage.$eval('.woocommerce-product-rating .devvn_average_rate', rating => rating.innerText);
+        let price = await productPage.$eval('.woocommerce-Price-amount', price => price.innerText);
+        let desc = await productPage.$eval('.woocommerce-product-details__short-description', desc => desc.innerText);
+        let img = await productPage.$eval('.woocommerce-product-gallery__wrapper img', img => img.src);
 
+        resolve({ name, rating, price, desc, img });
+        await productPage.close();
+
+        reject(new Error('no'));
+    });
+
+    for (link in links) {
+        let productData = await productDetail(links[link]);
+        result.push(productData);
+    }
+    
     browser.close();
+    // console.log('finished');
 
-    return {names, prices, imgs};
+    return result;
 }
 
-// scrapeWebsite('https://suabottot.com/sua-tang-can-cho-be/');
+// scrapeWebsite('https://suabottot.com/sua-tang-can-cho-nguoi-gay/');
 module.exports = { scrapeWebsite };
